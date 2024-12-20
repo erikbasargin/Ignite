@@ -25,8 +25,9 @@ struct FontStyleModifier: HTMLModifier {
             }
         } else if let text = content.body as? Text {
             text.fontStyle(style)
+        } else {
+            content
         }
-        content
     }
 }
 
