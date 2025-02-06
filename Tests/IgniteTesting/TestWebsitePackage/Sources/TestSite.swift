@@ -59,6 +59,6 @@ struct TestSitePublisher {
 
 struct TestStory: ContentLayout {
     var body: some HTML {
-        EmptyHTML()
+        Text(content.body)
     }
 }

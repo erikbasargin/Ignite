@@ -66,6 +66,59 @@ struct SiteTests {
 
         try package.clearBuildFolderAndTestContent()
     }
+    
+    @Test
+    func prettifyHTML() async throws {
+        let markdownFileURL = package.contentDirectoryURL.appending(path: "story-with-code.md")
+        let markdownContent = """
+        ---
+        layout: TestStory
+        lastModified: 03-30-2020 16:37
+        ---
+        
+        ```swift
+        struct Test<T>: Codable where T: Codable {
+            enum CodingKeys: String, CodingKey {
+                case value
+            }
+            
+            let value: T
+            let info: String
+        }
+        ```
+        """
+
+        try markdownContent.write(to: markdownFileURL, atomically: false, encoding: .utf8)
+
+        try await TestSitePublisher().publish()
+
+        #expect(package.checkIndexFileExists() == true)
+        
+        let htmlContent = try String(
+            contentsOf: package.buildDirectoryURL.appending(path: "story-with-code/index.html"),
+            encoding: .utf8
+        )
+        
+        let codeBlock = htmlContent
+            .split(separator: "<pre>")
+            .last?
+            .split(separator: "</pre>")
+            .first
+            
+        #expect(codeBlock == """
+        <code class="language-swift">struct Test<T>: Codable where T: Codable {
+            enum CodingKeys: String, CodingKey {
+                case value
+            }
+            
+            let value: T
+            let info: String
+        }
+        </code>
+        """)
+
+        try package.clearBuildFolderAndTestContent()
+    }
 }
 
 private struct TestPackage {
